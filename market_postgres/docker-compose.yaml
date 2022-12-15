@@ -6,15 +6,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: skymarket
-      POSTGRES_PASSWORD: skymarket
-      POSTGRES_DB: skymarket
+      POSTGRES_USER: skymarket_conf
+      POSTGRES_PASSWORD: skymarket_conf
+      POSTGRES_DB: skymarket_conf
     restart: always
     ports:
     - "5432:5432"
 
   frontend:
-    build: ../frontend_react/.
+    build: ../frontend_react
     volumes:
       - frontend:/app/build
     depends_on:
@@ -26,8 +26,8 @@ services:
       - "8000:8000"
       - "3000:3000"
     volumes:
-      - ../skymarket/django_static/:/usr/share/nginx/html/django_static/
-      - ../skymarket/django_media/:/usr/share/nginx/html/django_media/
+      - ../skymarket_conf/django_static/:/usr/share/nginx/html/django_static/
+      - ../skymarket_conf/django_media/:/usr/share/nginx/html/django_media/
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - frontend:/usr/share/nginx/html/
     restart: always
