@@ -23,10 +23,10 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path('api/api/ads/', include('ads.urls')),
-    path('api/api/users/', include('users.urls')),
-    path('api/api/token/', TokenObtainPairView.as_view()),
-    path('api/api/refresh/', TokenRefreshView.as_view()),
+    path('api/ads/', include('ads.urls')),
+    path('api/users/', include('users.urls')),
+    path('api/token/', TokenObtainPairView.as_view()),
+    path('api/refresh/', TokenRefreshView.as_view()),
     path("api/admin/", admin.site.urls),
     path("api/redoc-tasks/", include("redoc.urls")),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
