@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticate
 from rest_framework.views import APIView
 
 from ads.models import Ad, Comment
-from ads.permissions import PermissionsForUserComments, IsAdminPermissions
+from ads.permissions import PermissionsForUserComments, IsAdminPermissions, PermissionsForUserAds
 from ads.serializers import AdSerializer, AdDetailSerializer, AdDestroySerializer, \
     AdForCurrentUserSerializer, AdListSerializer, CommentDetailSerializer, CommentDestroySerializer
 from users.models import User
@@ -34,12 +34,12 @@ class AdViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'list':
-            return [permission() for permission in (AllowAny,)]
-        elif self.action in ['retrieve', 'create']:
-            return [permission() for permission in (IsAuthenticated,)]
-        elif self.action in ['partial_update', 'destroy']:
-            return [permission() for permission in (IsAdminPermissions,)]
-        return super(AdViewSet, self).get_permissions()
+            self.permission_classes = [AllowAny]
+        elif self.action == 'retrieve' or self.action == 'create':
+            self.permission_classes = [IsAuthenticated]
+        elif self.action == 'partial_update' or self.action == 'destroy':
+            self.permission_classes = [PermissionsForUserAds]
+        return super().get_permissions()
 
     def perform_create(self, serializer):
         instance = serializer.save(author=self.request.user)
@@ -50,13 +50,6 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentDetailSerializer
 
-    def get_permissions(self):
-        if self.action == 'list':
-            return [permission() for permission in (IsAuthenticated,)]
-        elif self.action in ['create']:
-            return [permission() for permission in (IsAuthenticated,)]
-        return super(CommentViewSet, self).get_permissions()
-
     def perform_create(self, serializer):
         instance = serializer.save(ad=Ad.objects.get(pk=self.kwargs['ad_pk']), author=self.request.user)
         instance = serializer.save()
@@ -64,15 +57,14 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class CurrentCommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
-
+    permission_classes = [PermissionsForUserComments]
     def get_permissions(self):
-        if self.action == 'destroy':
-            return [permission() for permission in (PermissionsForUserComments, IsAdminPermissions)]
-        elif self.action in ['create']:
-            return [permission() for permission in (IsAuthenticated,)]
-        elif self.action == 'partial_update':
-            return [permission() for permission in (PermissionsForUserComments, IsAdminPermissions)]
-        return super(CurrentCommentViewSet, self).get_permissions()
+        if self.action == 'destroy' or self.action == 'partial_update':
+            self.permission_classes = [PermissionsForUserComments]
+        if self.action == 'retrieve':
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
+
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return CommentDetailSerializer

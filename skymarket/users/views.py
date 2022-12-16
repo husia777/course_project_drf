@@ -1,3 +1,4 @@
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import viewsets, status
 from rest_framework.generics import RetrieveAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, UpdateAPIView
@@ -9,7 +10,7 @@ from users.serializers import UserRegistrationSerializer, CurrentUserSerializer,
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-
+    permission_classes = [AllowAny]
     def get_serializer_class(self):
         if self.action == 'list':
             return CurrentUserSerializer
@@ -22,6 +23,9 @@ class UserViewSet(viewsets.ModelViewSet):
         elif self.action == 'create':
             return UserRegistrationSerializer
 
+
+
+        return super().get_permissions()
 
 class UserCurrentViewSet(viewsets.ModelViewSet):
 
